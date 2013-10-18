@@ -1,0 +1,195 @@
+#include <iostream>
+
+using namespace std;
+const int size = 128;
+
+class Hashnode
+{
+    public:
+    Hashnode(int key,int value)
+    {
+        key1 = key;
+        value1 = value;
+        next1 = 0;
+    }
+    int getkey()
+    {
+        return key1;
+    }
+    int getvalue()
+    {
+        return value1;
+    }
+    void setvalue(int value)
+    {
+        value1 = value;
+    }
+    void setnext(Hashnode *next)
+    {
+        next1 = next;
+    }
+    Hashnode *getnext()
+    {
+        return next1;
+    }
+
+    private:
+    int key1;
+    int value1;
+    Hashnode *next1;
+
+};
+
+class HashMap
+{
+    public:
+
+    HashMap()
+    {
+        table = new Hashnode*[size];
+        for(int i = 0;i<size;i++)
+        {
+            table[i] = 0;
+        }
+    }
+
+    int hashfunc(int key)
+    {
+        return key % size;
+    }
+
+    void Put(int key,int value)
+    {
+        int hash = hashfunc(key);
+        if(table[hash]==NULL)
+        {
+            table[hash] = new Hashnode(key,value);
+        }
+        else
+        {
+            Hashnode* entry = table[hash];
+            while(entry->getnext()!=NULL && entry->getkey()!=key)
+            {
+                entry = entry->getnext();
+            }
+            if(entry->getkey()==key)
+            {
+                entry->setvalue(value);
+            }
+            else
+            {
+                entry->setnext(new Hashnode(key,value));
+            }
+        }
+    }
+
+    int Get(int key)
+    {
+        int hash = hashfunc(key);
+        if(table[hash] == NULL)
+        {
+            return -1;
+        }
+        else
+        {
+            Hashnode* entry = table[hash];
+            while(entry!=NULL && entry->getkey()!=key)
+            {
+                cout<<"The value is "<<entry->getvalue()<<endl;
+                //the above statement is not needed
+                entry = entry->getnext();
+            }
+            if(entry->getkey()==key)
+            {
+                return entry->getvalue();
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    void Remove(int key)
+    {
+        int hash = hashfunc(key);
+        if(table[hash]==NULL)
+        {
+            cout<<"There was no value to remove"<<endl;
+            return;
+        }
+        else
+        {
+            Hashnode* entry = table[hash];
+            Hashnode* preventry = 0;
+            while(entry!=NULL && entry->getkey()!=key)
+            {
+                preventry = entry;
+                entry = entry->getnext();
+            }
+            if(entry->getkey()==key && preventry == NULL)
+            {
+                preventry  = entry;
+                entry = entry->getnext();
+                table[hash] = entry;
+                delete preventry;
+            }
+            else if(entry->getkey()==key)
+            {
+                preventry->setnext(entry->getnext());
+                delete entry;
+            }
+            else //entry is NULL
+            {
+                cout<<"There was no value to remove"<<endl;
+                return;
+            }
+
+        }
+    }
+
+     ~HashMap()
+    {
+        for(int i = 0;i<size;i++)
+        {
+            if(table[i]!=NULL)
+            {
+                Hashnode* preventry = 0;
+                Hashnode* entry = table[i];
+                while(entry!=NULL)
+                {
+                    preventry = entry;
+                    entry = entry->getnext();
+                    delete preventry;
+
+                }
+            }
+        }
+        delete [] table;
+    }
+
+
+    private:
+    Hashnode** table;
+};
+
+
+
+
+
+int main()
+{
+    HashMap hmap;
+    hmap.Put(3,10);
+    hmap.Put(4,15);
+    hmap.Put(5,20);
+    hmap.Put(131,12);
+    hmap.Put(259,16);
+    cout<<hmap.Get(3)<<endl;
+    cout<<hmap.Get(4)<<endl;
+    hmap.Remove(3);
+    //cout<<hmap.Get(3)<<endl;
+    cout<<hmap.Get(131)<<endl;
+    cout<<hmap.Get(259)<<endl;
+    return 0;
+}
